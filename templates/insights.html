@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Business Insights - Customer Churn Prediction{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-lightbulb"></i> Business Insights & Recommendations
+        </h1>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+{% else %}
+
+<!-- Key Insights -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card metric-card text-center">
+            <div class="card-body">
+                <i class="fas fa-percentage fa-2x mb-2"></i>
+                <h3>{{ "{:.1f}".format(insights.overall_churn_rate * 100) }}%</h3>
+                <p class="mb-0">Overall Churn Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card metric-card warning text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <h3>{{ "{:,}".format(insights.high_risk_customers) }}</h3>
+                <p class="mb-0">High-Risk Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card metric-card danger text-center">
+            <div class="card-body">
+                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                <h3>{{ "{:.1f}".format(insights.revenue_at_risk * 100) }}%</h3>
+                <p class="mb-0">Revenue at Risk</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Churn Drivers -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line"></i> Key Churn Drivers
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for driver in insights.key_drivers %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ driver }}
+                        <span class="badge bg-danger rounded-pill">High Impact</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Segment Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="segmentChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> Strategic Recommendations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-warning">
+                            <div class="card-body">
+                                <h6 class="card-title text-warning">
+                                    <i class="fas fa-bullhorn"></i> Immediate Actions
+                                </h6>
+                                <ul class="list-unstyled">
+                                    <li>• Contact high-risk customers within 24 hours</li>
+                                    <li>• Offer personalized retention incentives</li>
+                                    <li>• Assign dedicated customer success managers</li>
+                                    <li>• Implement win-back campaigns</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h6 class="card-title text-info">
+                                    <i class="fas fa-chart-line"></i> Medium-term Strategies
+                                </h6>
+                                <ul class="list-unstyled">
+                                    <li>• Improve customer onboarding process</li>
+                                    <li>• Enhance support response times</li>
+                                    <li>• Develop usage analytics dashboard</li>
+                                    <li>• Create customer health scoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <h6 class="card-title text-success">
+                                    <i class="fas fa-shield-alt"></i> Long-term Initiatives
+                                </h6>
+                                <ul class="list-unstyled">
+                                    <li>• Build predictive churn models</li>
+                                    <li>• Implement automated retention workflows</li>
+                                    <li>• Develop customer success programs</li>
+                                    <li>• Create loyalty and rewards systems</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ROI Analysis -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calculator"></i> ROI Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-success">${{ "{:,.0f}".format(insights.high_risk_customers * 200) }}</h4>
+                            <p class="text-muted">Potential Revenue Saved</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-info">${{ "{:,.0f}".format(insights.high_risk_customers * 50) }}</h4>
+                            <p class="text-muted">Retention Investment</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-warning">300%</h4>
+                            <p class="text-muted">Expected ROI</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-primary">6 months</h4>
+                            <p class="text-muted">Payback Period</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Plan -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks"></i> 30-Day Action Plan
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Week 1</h6>
+                                    <p class="card-text">Identify high-risk customers and segment them by value</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Week 2</h6>
+                                    <p class="card-text">Launch targeted retention campaigns for top segments</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Week 3</h6>
+                                    <p class="card-text">Monitor campaign effectiveness and adjust strategies</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Week 4</h6>
+                                    <p class="card-text">Analyze results and plan next iteration</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Segment Chart
+const segmentCtx = document.getElementById('segmentChart').getContext('2d');
+const segmentData = {{ insights.segment_churn | tojson }};
+
+const segmentChart = new Chart(segmentCtx, {
+    type: 'bar',
+    data: {
+        labels: Object.keys(segmentData),
+        datasets: [{
+            label: 'Churn Rate (%)',
+            data: Object.values(segmentData).map(rate => rate * 100),
+            backgroundColor: Object.values(segmentData).map(rate => 
+                rate > 0.2 ? '#FF6384' : 
+                rate > 0.1 ? '#FFCE56' : '#4BC0C0'
+            )
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+

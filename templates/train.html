@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Train Model - Customer Churn Prediction{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-cogs"></i> Model Training & Management
+        </h1>
+    </div>
+</div>
+
+{% if success %}
+<div class="alert alert-success">
+    <i class="fas fa-check-circle"></i> {{ success }}
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<!-- Training Options -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-brain"></i> Model Training Configuration
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="dataset_size" class="form-label">Dataset Size</label>
+                                <select class="form-select" id="dataset_size" name="dataset_size">
+                                    <option value="5000">5,000 customers</option>
+                                    <option value="10000" selected>10,000 customers</option>
+                                    <option value="20000">20,000 customers</option>
+                                    <option value="50000">50,000 customers</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="test_size" class="form-label">Test Set Size</label>
+                                <select class="form-select" id="test_size" name="test_size">
+                                    <option value="0.1">10%</option>
+                                    <option value="0.2" selected>20%</option>
+                                    <option value="0.3">30%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="models" class="form-label">Models to Train</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="logistic" name="models" value="logistic" checked>
+                                    <label class="form-check-label" for="logistic">Logistic Regression</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="random_forest" name="models" value="random_forest" checked>
+                                    <label class="form-check-label" for="random_forest">Random Forest</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="xgboost" name="models" value="xgboost" checked>
+                                    <label class="form-check-label" for="xgboost">XGBoost</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lightgbm" name="models" value="lightgbm" checked>
+                                    <label class="form-check-label" for="lightgbm">LightGBM</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hyperparameter_tuning" class="form-label">Hyperparameter Tuning</label>
+                                <select class="form-select" id="hyperparameter_tuning" name="hyperparameter_tuning">
+                                    <option value="grid_search" selected>Grid Search</option>
+                                    <option value="random_search">Random Search</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="cross_validation" class="form-label">Cross-Validation Folds</label>
+                                <select class="form-select" id="cross_validation" name="cross_validation">
+                                    <option value="3">3 folds</option>
+                                    <option value="5" selected>5 folds</option>
+                                    <option value="10">10 folds</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="class_imbalance" class="form-label">Class Imbalance Handling</label>
+                                <select class="form-select" id="class_imbalance" name="class_imbalance">
+                                    <option value="smote" selected>SMOTE</option>
+                                    <option value="undersample">Random Undersampling</option>
+                                    <option value="none">None</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play"></i> Start Training
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Training Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Expected Training Time:</h6>
+                <ul class="list-unstyled">
+                    <li>• 10K customers: ~5 minutes</li>
+                    <li>• 20K customers: ~10 minutes</li>
+                    <li>• 50K customers: ~25 minutes</li>
+                </ul>
+                
+                <h6 class="mt-3">Models Included:</h6>
+                <ul class="list-unstyled">
+                    <li>• Logistic Regression</li>
+                    <li>• Random Forest</li>
+                    <li>• XGBoost</li>
+                    <li>• LightGBM</li>
+                    <li>• Gradient Boosting</li>
+                    <li>• SVM</li>
+                </ul>
+                
+                <h6 class="mt-3">Features:</h6>
+                <ul class="list-unstyled">
+                    <li>• Hyperparameter tuning</li>
+                    <li>• Cross-validation</li>
+                    <li>• Class imbalance handling</li>
+                    <li>• Model comparison</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line"></i> Current Model Performance
+                </h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Best Model:</strong> XGBoost</p>
+                <p><strong>Accuracy:</strong> 87.5%</p>
+                <p><strong>AUC-ROC:</strong> 0.91</p>
+                <p><strong>Last Updated:</strong> 2 hours ago</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history"></i> Training History
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Dataset Size</th>
+                                <th>Best Model</th>
+                                <th>Accuracy</th>
+                                <th>AUC-ROC</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-01-15 14:30</td>
+                                <td>10,000</td>
+                                <td>XGBoost</td>
+                                <td>87.5%</td>
+                                <td>0.91</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-14 09:15</td>
+                                <td>5,000</td>
+                                <td>Random Forest</td>
+                                <td>85.2%</td>
+                                <td>0.89</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-13 16:45</td>
+                                <td>10,000</td>
+                                <td>LightGBM</td>
+                                <td>86.8%</td>
+                                <td>0.90</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Management -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs"></i> Model Management
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-download"></i> Download Model
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-success">
+                                <i class="fas fa-upload"></i> Upload Model
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-warning">
+                                <i class="fas fa-sync"></i> Retrain Model
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar"></i> Model Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

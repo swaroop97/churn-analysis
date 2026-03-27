@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Customer Churn Prediction{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-tachometer-alt"></i> Customer Analytics Dashboard
+        </h1>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+</div>
+{% else %}
+
+<!-- Key Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card metric-card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h3>{{ "{:,}".format(metrics.total_customers) }}</h3>
+                <p class="mb-0">Total Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card warning text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <h3>{{ "{:.1f}".format(metrics.churn_rate * 100) }}%</h3>
+                <p class="mb-0">Churn Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card success text-center">
+            <div class="card-body">
+                <i class="fas fa-star fa-2x mb-2"></i>
+                <h3>{{ "{:,}".format(metrics.high_value_customers) }}</h3>
+                <p class="mb-0">High Value Customers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card danger text-center">
+            <div class="card-body">
+                <i class="fas fa-user-times fa-2x mb-2"></i>
+                <h3>{{ "{:,}".format(metrics.recent_churn) }}</h3>
+                <p class="mb-0">Recent Churn</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Churn by Segment
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="segmentChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Customer Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="distributionChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Segment Analysis Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table"></i> Segment Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Segment</th>
+                                <th>Customer Count</th>
+                                <th>Churn Rate</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for segment in metrics.segment_analysis %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">{{ segment.segment.title() }}</span>
+                                </td>
+                                <td>{{ "{:,}".format(segment.count) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if segment.churn_rate > 0.2 else 'warning' if segment.churn_rate > 0.1 else 'success' }}">
+                                        {{ "{:.1f}".format(segment.churn_rate * 100) }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if segment.churn_rate > 0.2 %}
+                                        <span class="text-danger">
+                                            <i class="fas fa-exclamation-triangle"></i> High Risk
+                                        </span>
+                                    {% elif segment.churn_rate > 0.1 %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-exclamation-circle"></i> Medium Risk
+                                        </span>
+                                    {% else %}
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle"></i> Low Risk
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Items -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks"></i> Recommended Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-bullhorn"></i> High-Risk Segments</h6>
+                            <p>Focus retention efforts on segments with churn rate > 20%</p>
+                            <a href="{{ url_for('insights') }}" class="btn btn-warning btn-sm">View Details</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-chart-line"></i> Monitor Trends</h6>
+                            <p>Track churn rate changes over time to identify patterns</p>
+                            <a href="{{ url_for('predict') }}" class="btn btn-info btn-sm">Start Predicting</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-shield-alt"></i> Retention Campaigns</h6>
+                            <p>Implement targeted campaigns for at-risk customers</p>
+                            <a href="{{ url_for('train_model') }}" class="btn btn-success btn-sm">Train Model</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Segment Chart
+const segmentCtx = document.getElementById('segmentChart').getContext('2d');
+const segmentData = {{ metrics.segment_analysis | tojson }};
+
+const segmentChart = new Chart(segmentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: segmentData.map(s => s.segment),
+        datasets: [{
+            data: segmentData.map(s => s.count),
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Distribution Chart
+const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+const distributionChart = new Chart(distributionCtx, {
+    type: 'bar',
+    data: {
+        labels: segmentData.map(s => s.segment),
+        datasets: [{
+            label: 'Churn Rate (%)',
+            data: segmentData.map(s => s.churn_rate * 100),
+            backgroundColor: segmentData.map(s => 
+                s.churn_rate > 0.2 ? '#FF6384' : 
+                s.churn_rate > 0.1 ? '#FFCE56' : '#4BC0C0'
+            )
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+
